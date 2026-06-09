@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Clicker Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 900px;
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Sekcja Klikania */
+        .clicker-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 40px 20px;
+            text-align: center;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .stats {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .click-target {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ff9800, #f44336);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(255, 152, 0, 0.4);
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border: 5px solid #ffeb3b;
+        }
+
+        .click-target:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
+        }
+
+        /* Sekcja Sklepu */
+        .shop-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 30px;
+            background-color: #252525;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shop-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4caf50;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .upgrade-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .upgrade-card:hover {
+            background-color: #3f3f3f;
+        }
+
+        .upgrade-info h3 {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-info p {
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        .buy-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .buy-btn:hover {
+            background-color: #45a049;
+        }
+
+        .buy-btn:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            margin-top: auto;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        /* Sekcja na Native Banner */
+        .ad-container-native {
+            background-color: #1e1e1e;
+            border: 1px dashed #555;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            font-size: 12px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="clicker-section">
+            <div class="score-display" id="score">0</div>
+            <div class="stats">
+                Moc kliknięcia: <span id="clickPower">1</span> | 
+                Na sekundę: <span id="autoPower">0</span>
+            </div>
+            
+            <div class="click-target" onclick="clickAction()">KLIK!</div>
+        </div>
+
+        <div class="shop-section">
+            
+            <div class="ad-container-native">
+                <span>Miejsce na Native Banner</span>
+            </div>
+            <h2 class="shop-title">Sklep Ulepszeń</h2>
+
+            <div class="upgrade-card">
+                <div class="upgrade-info">
+                    <h3>Mocne Palce</h3>
+                    <p>Poziom: <span id="lvlClick">0</span> (+1 do kliknięcia)</p>
+                </div>
+                <button class="buy-btn" id="btnClick" onclick="buyClickUpgrade()">Cena: 50</button>
+            </div>
+
+            <div class="upgrade-card">
+                <div class="upgrade-info">
+                    <h3>Robot Górnik</h3>
+                    <p>Poziom: <span id="lvlAuto">0</span> (+2 / sekundę)</p>
+                </div>
+                <button class="buy-btn" id="btnAuto" onclick="buyAutoUpgrade()">Cena: 200</button>
+            </div>
+
+            <button class="reset-btn" onclick="resetGame()">Resetuj postęp gry</button>
+        </div>
+    </div>
+
+    <script>
+        // Zmienne gry
+        let gameData = {
+            score: 0,
+            clickPower: 1,
+            autoPower: 0,
+            lvlClick: 0,
+            costClick: 50,
+            lvlAuto: 0,
+            costAuto: 200
+        };
+
+        // Ładowanie zapisu z LocalStorage
+        const savedData = localStorage.getItem("megaClickerSave");
+        if (savedData) {
+            gameData = JSON.parse(savedData);
+        }
+
+        // Elementy interfejsu
+        const elScore = document.getElementById("score");
+        const elClickPower = document.getElementById("clickPower");
+        const elAutoPower = document.getElementById("autoPower");
+        
+        const elLvlClick = document.getElementById("lvlClick");
+        const elBtnClick = document.getElementById("btnClick");
+        
+        const elLvlAuto = document.getElementById("lvlAuto");
+        const elBtnAuto = document.getElementById("btnAuto");
+
+        // Aktualizacja wyglądu na starcie
+        function updateUI() {
+            elScore.innerText = Math.floor(gameData.score);
+            elClickPower.innerText = gameData.clickPower;
+            elAutoPower.innerText = gameData.autoPower;
+
+            elLvlClick.innerText = gameData.lvlClick;
+            elBtnClick.innerText = "Cena: " + Math.floor(gameData.costClick);
+            elBtnClick.disabled = gameData.score < gameData.costClick;
+
+            elLvlAuto.innerText = gameData.lvlAuto;
+            elBtnAuto.innerText = "Cena: " + Math.floor(gameData.costAuto);
+            elBtnAuto.disabled = gameData.score < gameData.costAuto;
+        }
+
+        // Zapisywanie gry (wywoływane co sekundę)
+        function saveGame() {
+            localStorage.setItem("megaClickerSave", JSON.stringify(gameData));
+        }
+
+        // Główne kliknięcie
+        function clickAction() {
+            gameData.score += gameData.clickPower;
+            updateUI();
+        }
+
+        // Kupno siły kliknięcia
+        function buyClickUpgrade() {
+            if (gameData.score >= gameData.costClick) {
+                gameData.score -= gameData.costClick;
+                gameData.clickPower += 1;
+                gameData.lvlClick += 1;
+                gameData.costClick *= 1.5; // Zwiększenie ceny o 50%
+                updateUI();
+            }
+        }
+
+        // Kupno auto clickera
+        function buyAutoUpgrade() {
+            if (gameData.score >= gameData.costAuto) {
+                gameData.score -= gameData.costAuto;
+                gameData.autoPower += 2;
+                gameData.lvlAuto += 1;
+                gameData.costAuto *= 1.4; // Zwiększenie ceny o 40%
+                updateUI();
+            }
+        }
+
+        // Pętla gry (Automatyczne zarabianie)
+        setInterval(function() {
+            if (gameData.autoPower > 0) {
+                // Dzielimy przez 10, bo pętla działa co 100ms (płynniejsze dodawanie punktów)
+                gameData.score += gameData.autoPower / 10; 
+                updateUI();
+            }
+        }, 100);
+
+        // Pętla zapisu (co 1 sekundę)
+        setInterval(saveGame, 1000);
+
+        // Reset gry
+        function resetGame() {
+            if (confirm("Czy na pewno chcesz usunąć swój zapis gry?")) {
+                localStorage.removeItem("megaClickerSave");
+                location.reload();
+            }
+        }
+
+        // Inicjalizacja
+        updateUI();
+    </script>
+
+
+    <script type="text/javascript">
+        // TUTAJ WKLEJ KOD SOCIAL BAR (Zaczyna się zazwyczaj od atOptions...)
+    </script>
+
+    <script type="text/javascript">
+        // TUTAJ WKLEJ KOD POPUNDER
+    </script>
+    </body>
+</html>
