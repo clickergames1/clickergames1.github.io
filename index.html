@@ -56,6 +56,7 @@
             font-size: 14px;
             color: #aaa;
             margin-bottom: 40px;
+            line-height: 1.6;
         }
 
         .click-target {
@@ -158,10 +159,9 @@
             font-size: 12px;
         }
 
-        /* Sekcja na Native Banner */
+        /* Kontener na Native Banner */
         .ad-container-native {
             background-color: #1e1e1e;
-            border: 1px dashed #555;
             padding: 10px;
             text-align: center;
             margin-bottom: 20px;
@@ -169,10 +169,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #555;
-            font-size: 12px;
         }
-
     </style>
 </head>
 <body>
@@ -182,7 +179,8 @@
             <div class="score-display" id="score">0</div>
             <div class="stats">
                 Moc kliknięcia: <span id="clickPower">1</span> | 
-                Na sekundę: <span id="autoPower">0</span>
+                Na sekundę: <span id="autoPower">0</span> <br>
+                <small style="color: #666;">Następna reklama za: <span id="adTimer">50</span> s</small>
             </div>
             
             <div class="click-target" onclick="clickAction()">KLIK!</div>
@@ -191,7 +189,8 @@
         <div class="shop-section">
             
             <div class="ad-container-native">
-                <span>Miejsce na Native Banner</span>
+                <script async="async" data-cfasync="false" src="https://pl29687446.effectivecpmnetwork.com/7055b53151e7b16b743503483a46ee84/invoke.js"></script>
+                <div id="container-7055b53151e7b16b743503483a46ee84"></div>
             </div>
             <h2 class="shop-title">Sklep Ulepszeń</h2>
 
@@ -216,7 +215,6 @@
     </div>
 
     <script>
-        // Zmienne gry
         let gameData = {
             score: 0,
             clickPower: 1,
@@ -227,16 +225,18 @@
             costAuto: 200
         };
 
-        // Ładowanie zapisu z LocalStorage
-        const savedData = localStorage.getItem("megaClickerSave");
+        // Licznik czasu do reklamy (50 sekund)
+        let timeToNextAd = 50;
+
+        const savedData = localStorage.getItem("megaClickerSaveTime");
         if (savedData) {
             gameData = JSON.parse(savedData);
         }
 
-        // Elementy interfejsu
         const elScore = document.getElementById("score");
         const elClickPower = document.getElementById("clickPower");
         const elAutoPower = document.getElementById("autoPower");
+        const elAdTimer = document.getElementById("adTimer");
         
         const elLvlClick = document.getElementById("lvlClick");
         const elBtnClick = document.getElementById("btnClick");
@@ -244,11 +244,11 @@
         const elLvlAuto = document.getElementById("lvlAuto");
         const elBtnAuto = document.getElementById("btnAuto");
 
-        // Aktualizacja wyglądu na starcie
         function updateUI() {
             elScore.innerText = Math.floor(gameData.score);
             elClickPower.innerText = gameData.clickPower;
             elAutoPower.innerText = gameData.autoPower;
+            elAdTimer.innerText = timeToNextAd;
 
             elLvlClick.innerText = gameData.lvlClick;
             elBtnClick.innerText = "Cena: " + Math.floor(gameData.costClick);
@@ -259,70 +259,82 @@
             elBtnAuto.disabled = gameData.score < gameData.costAuto;
         }
 
-        // Zapisywanie gry (wywoływane co sekundę)
         function saveGame() {
-            localStorage.setItem("megaClickerSave", JSON.stringify(gameData));
+            localStorage.setItem("megaClickerSaveTime", JSON.stringify(gameData));
         }
 
-        // Główne kliknięcie
+        // Zwykłe kliknięcie (bez sprawdzania ilości klików)
         function clickAction() {
             gameData.score += gameData.clickPower;
             updateUI();
         }
 
-        // Kupno siły kliknięcia
+        // FUNKCJA DYNAMICZNEGO WYWOŁYWANIA POPUNDERA
+        function triggerPopunder() {
+            const oldScript = document.getElementById("adsterra-popunder-script");
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const popScript = document.createElement("script");
+            popScript.id = "adsterra-popunder-script";
+            popScript.src = "https://pl29687445.effectivecpmnetwork.com/1f/6f/4b/1f6f4b560ba0996bea0e8d9ed5bb6378.js";
+            document.body.appendChild(popScript);
+        }
+
         function buyClickUpgrade() {
             if (gameData.score >= gameData.costClick) {
                 gameData.score -= gameData.costClick;
                 gameData.clickPower += 1;
                 gameData.lvlClick += 1;
-                gameData.costClick *= 1.5; // Zwiększenie ceny o 50%
+                gameData.costClick *= 1.5;
                 updateUI();
             }
         }
 
-        // Kupno auto clickera
         function buyAutoUpgrade() {
             if (gameData.score >= gameData.costAuto) {
                 gameData.score -= gameData.costAuto;
                 gameData.autoPower += 2;
                 gameData.lvlAuto += 1;
-                gameData.costAuto *= 1.4; // Zwiększenie ceny o 40%
+                gameData.costAuto *= 1.4;
                 updateUI();
             }
         }
 
-        // Pętla gry (Automatyczne zarabianie)
+        // Pętla 100ms dla płynnego auto-clickera
         setInterval(function() {
             if (gameData.autoPower > 0) {
-                // Dzielimy przez 10, bo pętla działa co 100ms (płynniejsze dodawanie punktów)
                 gameData.score += gameData.autoPower / 10; 
                 updateUI();
             }
         }, 100);
 
-        // Pętla zapisu (co 1 sekundę)
-        setInterval(saveGame, 1000);
+        // GŁÓWNA PĘTLA CZASOWA (Wywoływana co 1 sekundę)
+        setInterval(function() {
+            saveGame(); // Zapis gry co sekundę
 
-        // Reset gry
+            // Odliczanie czasu do reklamy
+            timeToNextAd--;
+            
+            if (timeToNextAd <= 0) {
+                triggerPopunder(); // Odpalenie Popundera po 50 sekundach
+                timeToNextAd = 50;  // Reset licznika z powrotem na 50 sekund
+            }
+            
+            elAdTimer.innerText = timeToNextAd;
+        }, 1000);
+
         function resetGame() {
-            if (confirm("Czy na pewno chcesz usunąć swój zapis gry?")) {
-                localStorage.removeItem("megaClickerSave");
+            if (confirm("Czy na pewno chcesz zresetować grę?")) {
+                localStorage.removeItem("megaClickerSaveTime");
                 location.reload();
             }
         }
 
-        // Inicjalizacja
         updateUI();
     </script>
 
-
-    <script type="text/javascript">
-        // TUTAJ WKLEJ KOD SOCIAL BAR (Zaczyna się zazwyczaj od atOptions...)
-    </script>
-
-    <script type="text/javascript">
-        // TUTAJ WKLEJ KOD POPUNDER
-    </script>
+    <script src="https://pl29687447.effectivecpmnetwork.com/19/f6/2b/19f62bf091a19b56f0538cbfbb8b8587.js"></script>
     </body>
 </html>
